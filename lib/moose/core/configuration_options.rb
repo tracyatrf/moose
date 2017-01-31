@@ -7,10 +7,11 @@ module Moose
     class ConfigurationOptions
       class NoEnvironmentError < Moose::Error; end
       RUN_OPTIONS = [:tags, :groups, :run_in_threads]
-      attr_reader :args
+      attr_reader :args, :output_strategy
 
-      def initialize(args)
+      def initialize(args, output_strategy = nil)
         @args = args
+        @output_strategy = output_strategy
       end
 
       def assign_environment
@@ -35,6 +36,7 @@ module Moose
         select_keys_at(*::Moose::Configuration::DEFAULTS.keys).each do |key, value|
           config.send("#{key}=", value)
         end
+        config.add_output_strategy(output_strategy) if output_strategy
       end
 
       def moose_run_args

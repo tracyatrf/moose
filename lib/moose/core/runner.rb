@@ -2,7 +2,10 @@ module Moose
   module Core
     class Runner
       class << self
-        def invoke
+
+        def invoke(run_args = ARGV, output_strategy=nil)
+          @run_args = run_args
+          @output_strategy = output_strategy
           trap_interrupt
           configuration_options_instance.parse_args
           ::Moose.require_files!
@@ -21,7 +24,7 @@ module Moose
         end
 
         def configuration_options_instance
-          @configuration_options_instance ||= ConfigurationOptions.new(ARGV)
+          @configuration_options_instance ||= ConfigurationOptions.new(run_args, output_strategy)
         end
 
         def trap_interrupt
@@ -31,6 +34,9 @@ module Moose
             STDERR.puts "\nExiting... Interrupt again to exit immediately."
           end
         end
+
+        private
+        attr_reader :run_args, :output_strategy
       end
     end
   end

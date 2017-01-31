@@ -3,6 +3,11 @@ module Moose
     class Reporter
       attr_reader :test_case
 
+      TYPE_MAP = { 
+        failure: :fatal,
+        error: :error,
+      }
+
       def initialize(test_case)
         @test_case = test_case
       end
@@ -37,7 +42,16 @@ module Moose
         message_with(:info, "#{environment_variables} bundle exec moose #{Moose.environment} #{test_case.trimmed_filepath}")
       end
 
+      def add_strategy(logger)
+        raise "Loggers must respond to write" unless logger.respond_to?(:write)
+        log_strategies << logger
+      end
+
       private
+
+      def log_strategies
+        @log_strategies ||= []
+      end
 
       def err
         test_case.exception
@@ -81,11 +95,15 @@ module Moose
       end
 
       def newline
-        Moose.msg.newline("", true)
+        msg = Moose.msg.newline("", true)
+        log_strategies.map { |logger| logger.info(msg) }
       end
 
       def message_with(type, message)
-        Moose.msg.send(type, "\t#{message}", true)
+        logger_type = TYPE_MAP.fetch(type, :info)
+        msg = "\t#{message}"
+        formatted_message = Moose.msg.send(type, msg, true)
+        log_strategies.map { |logger| logger.send(logger_type, formatted_message) }
       end
 
       def gem_dir

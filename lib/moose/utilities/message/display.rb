@@ -9,10 +9,16 @@ module Moose
           @force = force
         end
 
+        def write(output="\n")
+          message = "#{output}\n"
+          Moose.configuration.output_strategies.each{ |strategy| strategy.write(message) }     
+          message   
+        end
+
         def debug
           with_checks do
             output = message.split("\n").map{ |line| line = "DEBUG: #{line}"}.join
-            puts output.swap
+            write output.swap
           end
         end
 
@@ -20,13 +26,13 @@ module Moose
 
         def standard
           with_checks do
-            puts message
+            write message
           end
         end
 
         def dog
           with_checks do
-            puts "MOOSE BARKS!"
+            write "MOOSE BARKS!"
           end
         end
 
@@ -38,7 +44,7 @@ module Moose
 
         def error
           with_checks do
-            puts message.send(font_color_for(:error))
+            write message.send(font_color_for(:error))
           end
         end
 
@@ -62,7 +68,7 @@ module Moose
 
         def warn
           with_checks do
-            puts message.send(font_color_for(:warn))
+            write message.send(font_color_for(:warn))
           end
         end
 
@@ -81,21 +87,21 @@ module Moose
 
         def info
           with_checks do
-            puts message.send(font_color_for(:info))
+            write message.send(font_color_for(:info))
           end
         end
 
         def banner
           with_checks do
             output = ("\n*** #{message} ***\n")
-            puts output.send(font_color_for(:banner))
+            write output.send(font_color_for(:banner))
           end
         end
 
         def header
           with_checks do
             output = "\n[#{message}]\n"
-            puts output.send(font_color_for(:header))
+            write output.send(font_color_for(:header))
           end
         end
 
@@ -108,7 +114,7 @@ module Moose
         def case_description
           with_checks do
             output = "\n[#{message}]"
-            puts output.send(font_color_for(:case_description))
+            write output.send(font_color_for(:case_description))
           end
         end
 
@@ -120,20 +126,20 @@ module Moose
 
         def step
           with_checks do
-            puts message.send(font_color_for(:step))
+            write message.send(font_color_for(:step))
           end
         end
 
         def case_group
           with_checks do
             newline
-            puts message
+            write message
           end
         end
 
         def newline
           with_checks do
-            puts
+            write
           end
         end
 
@@ -165,7 +171,7 @@ module Moose
         def with_background(key)
           font_color = font_color_for(key)
           background_color = background_color_for(key)
-          puts message.colorize(:color => font_color, :background => background_color.to_sym)
+          write message.colorize(:color => font_color, :background => background_color.to_sym)
         end
       end
     end

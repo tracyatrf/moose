@@ -25,7 +25,8 @@ module Moose
       :rerun_failed => false,
       :show_full_error_backtrace => false,
       :test_status_persistence_directory => nil,
-      :environment_variables => ["MOOSE_STATUS_FILE_PREFIX"]
+      :environment_variables => ["MOOSE_STATUS_FILE_PREFIX"],
+      :output_strategies => [$stdout],
     }
 
     attr_accessor *DEFAULTS.keys
@@ -52,6 +53,15 @@ module Moose
       @run_hook_collection ||= Hook::Collection.new
     end
 
+    def add_output_strategy(logger)
+      raise "Loggers must respond to write" unless logger.respond_to?(:write)
+      @output_strategies << logger
+    end
+
+    def remove_output_strategy(logger)
+      @output_strategies = output_strategies - [logger]
+    end
+
     def add_before_run_hook(&block)
       create_before_hook_from(collection: run_hook_collection, block: block)
     end
@@ -62,6 +72,10 @@ module Moose
 
     def run_test_case_with_hooks(test_case:, on_error: nil, &block)
       call_hooks_with_entity(entity: test_case, on_error: on_error, &block)
+    end
+
+    def run_teardown_with_hooks(test_case:, on_error: nil, &block)
+      call_teardown_hooks_with_entity(entity: test_case, on_error: on_error, &block)
     end
 
     alias_method :before_each_test_case, :add_before_hook
