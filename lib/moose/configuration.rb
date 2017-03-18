@@ -28,6 +28,8 @@ module Moose
     end
 
     DEFAULTS = {
+      :feature_flag_identifier => "",
+      :feature_flags => [],
       :verbose => false,
       :snapshot_directory => "snapshots",
       :snapshots => false,
@@ -118,6 +120,14 @@ module Moose
 
     def log_strategies
       @log_strategies ||= []
+    end
+
+    def flag_on! (flag)
+      feature_flags << flag unless feature_flags.include?(flag)
+    end
+
+    def flag_off!(flag)
+      feature_flags.delete(flag) if feature_flags.include?(flag)
     end
 
     def configure_msg
