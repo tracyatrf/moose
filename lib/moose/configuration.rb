@@ -49,7 +49,19 @@ module Moose
     attr_accessor :run_options
 
     def initialize
-      DEFAULTS.each do |key, value|
+      all_options.each do |key, value|
+        self.send("#{key}=", value)
+      end
+    end
+
+    def all_options
+      @all_options ||= DEFAULTS
+    end
+
+    def create_options(options)
+      options.each do |key, value|
+        all_options[key] = value
+        self.class.class_eval { attr_accessor key }
         self.send("#{key}=", value)
       end
     end
